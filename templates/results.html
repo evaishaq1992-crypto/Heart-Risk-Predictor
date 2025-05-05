@@ -225,6 +225,12 @@
                                 This prediction is based on statistical modeling and should not replace professional medical advice.
                                 If you have concerns about heart disease risk, please consult with a healthcare provider.
                             </p>
+                            {% if prediction_id %}
+                            <p class="mt-2">
+                                <i class="fas fa-database me-1"></i> Prediction ID: <strong>{{ prediction_id }}</strong>
+                                (Saved to database for future reference)
+                            </p>
+                            {% endif %}
                             <hr>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                                 <a href="/predict" class="btn btn-primary">
@@ -232,6 +238,9 @@
                                 </a>
                                 <a href="/" class="btn btn-secondary">
                                     <i class="fas fa-home me-2"></i> Return to Home
+                                </a>
+                                <a href="/history" class="btn btn-info">
+                                    <i class="fas fa-history me-2"></i> View Prediction History
                                 </a>
                             </div>
                         </div>
