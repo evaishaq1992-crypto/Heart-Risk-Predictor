@@ -1,0 +1,232 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="fas fa-heartbeat me-2"></i> Heart Disease Detection System</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    This application uses machine learning to predict the risk of heart disease based on clinical parameters.
+                    Our models have been trained on the UCI Heart Disease dataset and can provide accurate risk assessments.
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <a href="/predict" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-stethoscope me-2"></i> Start Prediction
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dataset Information -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-database me-2"></i> Dataset Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body text-center">
+                                <h4>{{ dataset_info.num_records }}</h4>
+                                <p class="text-muted">Total Records</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body text-center">
+                                <h4>{{ dataset_info.num_features }}</h4>
+                                <p class="text-muted">Clinical Features</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body text-center">
+                                <h4>UCI Heart Disease</h4>
+                                <p class="text-muted">Source Dataset</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p>The dataset includes the following key features:</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Age
+                                <span class="badge bg-primary rounded-pill">Demographic</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Sex
+                                <span class="badge bg-primary rounded-pill">Demographic</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Chest Pain Type
+                                <span class="badge bg-warning rounded-pill">Symptom</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Resting Blood Pressure
+                                <span class="badge bg-info rounded-pill">Clinical</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Cholesterol
+                                <span class="badge bg-info rounded-pill">Clinical</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Fasting Blood Sugar
+                                <span class="badge bg-info rounded-pill">Clinical</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                ECG Results
+                                <span class="badge bg-info rounded-pill">Clinical</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Maximum Heart Rate
+                                <span class="badge bg-info rounded-pill">Clinical</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Exercise Induced Angina
+                                <span class="badge bg-warning rounded-pill">Symptom</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                ST Depression
+                                <span class="badge bg-info rounded-pill">Clinical</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Number of Vessels Colored
+                                <span class="badge bg-danger rounded-pill">Diagnostic</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Thalassemia
+                                <span class="badge bg-danger rounded-pill">Diagnostic</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dataset Visualizations -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Dataset Exploratory Analysis</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">Target Distribution</div>
+                            <div class="card-body">
+                                <img src="{{ target_plot }}" alt="Target Distribution" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">Age Distribution by Heart Disease Status</div>
+                            <div class="card-body">
+                                <img src="{{ age_plot }}" alt="Age Distribution" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">Gender Distribution by Heart Disease Status</div>
+                            <div class="card-body">
+                                <img src="{{ gender_plot }}" alt="Gender Distribution" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">Feature Importance</div>
+                            <div class="card-body">
+                                <img src="{{ feature_importance }}" alt="Feature Importance" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">Correlation Matrix</div>
+                            <div class="card-body">
+                                <img src="{{ correlation_plot }}" alt="Correlation Matrix" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Performance -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-brain me-2"></i> Model Performance</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for model_name, metrics in model_metrics.items() %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-header">{{ model_name }}</div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5>Accuracy:</h5>
+                                    <h5>{{ (metrics.accuracy * 100)|round(2) }}%</h5>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5>ROC-AUC:</h5>
+                                    <h5>{{ (metrics.auc * 100)|round(2) }}%</h5>
+                                </div>
+                                <div class="mt-3">
+                                    <h6>Confusion Matrix:</h6>
+                                    <div class="mt-2 confusion-matrix">
+                                        <table class="table table-bordered text-center">
+                                            <tr>
+                                                <td></td>
+                                                <td>Predicted No</td>
+                                                <td>Predicted Yes</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Actual No</td>
+                                                <td>{{ metrics.confusion_matrix[0][0] }}</td>
+                                                <td>{{ metrics.confusion_matrix[0][1] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Actual Yes</td>
+                                                <td>{{ metrics.confusion_matrix[1][0] }}</td>
+                                                <td>{{ metrics.confusion_matrix[1][1] }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

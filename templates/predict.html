@@ -1,0 +1,296 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="fas fa-stethoscope me-2"></i> Heart Disease Risk Prediction</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Enter patient information below to get a heart disease risk prediction. All fields are required.
+                </p>
+                
+                <form action="/predict" method="post" id="prediction-form" class="needs-validation" novalidate>
+                    <div class="row g-3">
+                        <!-- Demographic Information -->
+                        <div class="col-12">
+                            <h4 class="mb-3">Demographic Information</h4>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="age" class="form-label">Age (years)</label>
+                            <input type="number" class="form-control" id="age" name="age" min="20" max="100" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid age between 20 and 100.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="sex" class="form-label">Sex</label>
+                            <select class="form-select" id="sex" name="sex" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select the patient's sex.
+                            </div>
+                        </div>
+                        
+                        <!-- Clinical Features -->
+                        <div class="col-12 mt-4">
+                            <h4 class="mb-3">Clinical Measurements</h4>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="trestbps" class="form-label">Resting Blood Pressure (mm Hg)</label>
+                            <input type="number" class="form-control" id="trestbps" name="trestbps" min="80" max="200" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid blood pressure between 80 and 200 mm Hg.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="chol" class="form-label">Serum Cholesterol (mg/dl)</label>
+                            <input type="number" class="form-control" id="chol" name="chol" min="100" max="600" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid cholesterol level between 100 and 600 mg/dl.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="fbs" class="form-label">Fasting Blood Sugar > 120 mg/dl</label>
+                            <select class="form-select" id="fbs" name="fbs" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="1">Yes (> 120 mg/dl)</option>
+                                <option value="0">No (≤ 120 mg/dl)</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select the fasting blood sugar status.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="thalach" class="form-label">Maximum Heart Rate Achieved</label>
+                            <input type="number" class="form-control" id="thalach" name="thalach" min="60" max="220" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid maximum heart rate between 60 and 220.
+                            </div>
+                        </div>
+                        
+                        <!-- Symptoms and ECG Results -->
+                        <div class="col-12 mt-4">
+                            <h4 class="mb-3">Symptoms and ECG Results</h4>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="cp" class="form-label">Chest Pain Type</label>
+                            <select class="form-select" id="cp" name="cp" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="0">Typical Angina</option>
+                                <option value="1">Atypical Angina</option>
+                                <option value="2">Non-Anginal Pain</option>
+                                <option value="3">Asymptomatic</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select the chest pain type.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="restecg" class="form-label">Resting Electrocardiographic Results</label>
+                            <select class="form-select" id="restecg" name="restecg" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="0">Normal</option>
+                                <option value="1">ST-T Wave Abnormality</option>
+                                <option value="2">Left Ventricular Hypertrophy</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select the ECG result.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="exang" class="form-label">Exercise Induced Angina</label>
+                            <select class="form-select" id="exang" name="exang" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select whether exercise induced angina is present.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="oldpeak" class="form-label">ST Depression Induced by Exercise Relative to Rest</label>
+                            <input type="number" step="0.1" class="form-control" id="oldpeak" name="oldpeak" min="0" max="10" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid ST depression value between 0 and 10.
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Diagnostic Features -->
+                        <div class="col-12 mt-4">
+                            <h4 class="mb-3">Advanced Diagnostic Features</h4>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="slope" class="form-label">Slope of the Peak Exercise ST Segment</label>
+                            <select class="form-select" id="slope" name="slope" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="0">Upsloping</option>
+                                <option value="1">Flat</option>
+                                <option value="2">Downsloping</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select the slope type.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="ca" class="form-label">Number of Major Vessels Colored by Fluoroscopy</label>
+                            <select class="form-select" id="ca" name="ca" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select the number of major vessels.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="thal" class="form-label">Thalassemia</label>
+                            <select class="form-select" id="thal" name="thal" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="1">Normal</option>
+                                <option value="2">Fixed Defect</option>
+                                <option value="3">Reversible Defect</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select the thalassemia type.
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 mt-4">
+                            <button class="btn btn-primary btn-lg w-100" type="submit">
+                                <i class="fas fa-heartbeat me-2"></i> Predict Heart Disease Risk
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-info-circle me-2"></i> Feature Explanations</h3>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="featureExplanations">
+                    <!-- Age Feature -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingAge">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAge" aria-expanded="false" aria-controls="collapseAge">
+                                Age
+                            </button>
+                        </h2>
+                        <div id="collapseAge" class="accordion-collapse collapse" aria-labelledby="headingAge" data-bs-parent="#featureExplanations">
+                            <div class="accordion-body">
+                                <p>Age is a significant risk factor for heart disease. Risk increases with age, particularly after 45 for men and 55 for women.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sex Feature -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingSex">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSex" aria-expanded="false" aria-controls="collapseSex">
+                                Sex
+                            </button>
+                        </h2>
+                        <div id="collapseSex" class="accordion-collapse collapse" aria-labelledby="headingSex" data-bs-parent="#featureExplanations">
+                            <div class="accordion-body">
+                                <p>Males generally have a higher risk of heart disease than females, especially before age 55. After menopause, women's risk increases.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chest Pain Type Feature -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingCP">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCP" aria-expanded="false" aria-controls="collapseCP">
+                                Chest Pain Type
+                            </button>
+                        </h2>
+                        <div id="collapseCP" class="accordion-collapse collapse" aria-labelledby="headingCP" data-bs-parent="#featureExplanations">
+                            <div class="accordion-body">
+                                <p>Chest pain types range from typical angina (classic heart-related chest pain) to non-anginal pain. Asymptomatic patients may still have heart disease without experiencing chest pain.</p>
+                                <ul>
+                                    <li><strong>Typical Angina (0):</strong> Classical heart-related chest pain</li>
+                                    <li><strong>Atypical Angina (1):</strong> Not all classical features of angina</li>
+                                    <li><strong>Non-Anginal Pain (2):</strong> Not related to heart</li>
+                                    <li><strong>Asymptomatic (3):</strong> No symptoms</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add more features as accordion items -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTrestbps">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTrestbps" aria-expanded="false" aria-controls="collapseTrestbps">
+                                Resting Blood Pressure
+                            </button>
+                        </h2>
+                        <div id="collapseTrestbps" class="accordion-collapse collapse" aria-labelledby="headingTrestbps" data-bs-parent="#featureExplanations">
+                            <div class="accordion-body">
+                                <p>Resting blood pressure above 140/90 mmHg is considered hypertension, a major risk factor for heart disease.</p>
+                                <ul>
+                                    <li><strong>Normal:</strong> Less than 120 mmHg</li>
+                                    <li><strong>Elevated:</strong> 120-129 mmHg</li>
+                                    <li><strong>Stage 1 Hypertension:</strong> 130-139 mmHg</li>
+                                    <li><strong>Stage 2 Hypertension:</strong> 140 mmHg or higher</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingChol">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChol" aria-expanded="false" aria-controls="collapseChol">
+                                Serum Cholesterol
+                            </button>
+                        </h2>
+                        <div id="collapseChol" class="accordion-collapse collapse" aria-labelledby="headingChol" data-bs-parent="#featureExplanations">
+                            <div class="accordion-body">
+                                <p>Total serum cholesterol levels above 200 mg/dL increase risk of heart disease.</p>
+                                <ul>
+                                    <li><strong>Desirable:</strong> Less than 200 mg/dL</li>
+                                    <li><strong>Borderline High:</strong> 200-239 mg/dL</li>
+                                    <li><strong>High:</strong> 240 mg/dL and above</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- More features explanations can be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
+{% endblock %}

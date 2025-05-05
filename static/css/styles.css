@@ -1,0 +1,94 @@
+/* Custom styles for the Heart Disease Detection System */
+
+/* High contrast colors for important information */
+.risk-high {
+    color: var(--bs-danger);
+    font-weight: bold;
+}
+
+.risk-medium {
+    color: var(--bs-warning);
+    font-weight: bold;
+}
+
+.risk-low {
+    color: var(--bs-success);
+    font-weight: bold;
+}
+
+/* Gauge chart styles */
+.gauge-container {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.gauge-value {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    bottom: 25px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Enhanced card styles */
+.card {
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+/* Custom style for confusion matrix */
+.confusion-matrix {
+    font-size: 0.9rem;
+}
+
+/* Make the results page look more like a medical report */
+.clinical-report {
+    background-color: var(--bs-gray-800);
+    border-radius: 8px;
+    border: 1px solid var(--bs-gray-700);
+    padding: 20px;
+}
+
+/* Add some breathing room below navbar */
+.navbar {
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px !important;
+    }
+}
+
+/* Improved form styles */
+.form-label {
+    font-weight: 500;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Footer adjustments */
+.footer {
+    margin-top: 3rem;
+    padding: 1.5rem 0;
+}
+
+/* Custom badge style for feature categories */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
