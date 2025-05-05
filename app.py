@@ -11,6 +11,7 @@ import base64
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.middleware.proxy_fix import ProxyFix
+from models import db, User, Prediction
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,6 +21,21 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "default-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+# Configure the database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize the database with the app
+db.init_app(app)
+
+# Create all database tables
+with app.app_context():
+    db.create_all()
 
 # Import the ML model
 from heart_disease_model import HeartDiseaseModel
@@ -98,6 +114,53 @@ def predict():
         # Make prediction
         prediction_results = heart_model.predict(input_data)
         
+        # Get feature contributions for database storage
+        feature_contributions = heart_model.get_feature_contributions(input_data)
+        
+        # Store prediction in database
+        try:
+            new_prediction = Prediction(
+                # User info (if provided) - we'll implement user login later
+                # user_id = None currently for anonymous predictions
+                
+                # Prediction results
+                probability=prediction_results['probability'],
+                prediction_result=prediction_results['prediction'] == 1,  # Convert to boolean
+                risk_level=prediction_results['risk_level'],
+                model_name=prediction_results['model_name'],
+                
+                # Input parameters
+                age=age,
+                sex=sex,
+                cp=cp,
+                trestbps=trestbps,
+                chol=chol,
+                fbs=fbs,
+                restecg=restecg,
+                thalach=thalach,
+                exang=exang,
+                oldpeak=oldpeak,
+                slope=slope,
+                ca=ca,
+                thal=thal,
+                
+                # Additional data
+                model_predictions=prediction_results['model_predictions'],
+                feature_contributions=feature_contributions
+            )
+            
+            db.session.add(new_prediction)
+            db.session.commit()
+            logger.info(f"Prediction saved to database with ID: {new_prediction.id}")
+            
+            # Store prediction ID in session
+            session['prediction_id'] = new_prediction.id
+            
+        except Exception as db_error:
+            logger.error(f"Database error: {str(db_error)}")
+            # Continue with prediction even if DB save fails
+            db.session.rollback()
+        
         # Store results in session
         session['prediction_results'] = prediction_results
         session['input_data'] = input_data
@@ -114,6 +177,7 @@ def results():
     """Display the prediction results."""
     prediction_results = session.get('prediction_results')
     input_data = session.get('input_data')
+    prediction_id = session.get('prediction_id')
     
     if not prediction_results or not input_data:
         flash("No prediction data available. Please submit the form first.", "warning")
@@ -130,7 +194,64 @@ def results():
         prediction=prediction_results,
         input_data=input_data,
         feature_explanations=feature_explanations,
-        feature_contributions=feature_contributions
+        feature_contributions=feature_contributions,
+        prediction_id=prediction_id
+    )
+
+@app.route("/history")
+def prediction_history():
+    """Display prediction history from the database."""
+    # Get all predictions, ordered by most recent first
+    predictions = Prediction.query.order_by(Prediction.created_at.desc()).all()
+    
+    return render_template(
+        "history.html",
+        predictions=predictions
+    )
+
+@app.route("/history/<int:prediction_id>")
+def prediction_detail(prediction_id):
+    """Display detailed results for a specific prediction."""
+    # Get the prediction from the database
+    prediction = Prediction.query.get_or_404(prediction_id)
+    
+    # Create input data dictionary
+    input_data = {
+        'age': prediction.age,
+        'sex': prediction.sex,
+        'cp': prediction.cp,
+        'trestbps': prediction.trestbps,
+        'chol': prediction.chol,
+        'fbs': prediction.fbs,
+        'restecg': prediction.restecg,
+        'thalach': prediction.thalach,
+        'exang': prediction.exang,
+        'oldpeak': prediction.oldpeak,
+        'slope': prediction.slope,
+        'ca': prediction.ca,
+        'thal': prediction.thal
+    }
+    
+    # Get feature explanations
+    feature_explanations = heart_model.get_feature_explanations(input_data)
+    
+    # Create prediction results dictionary similar to the heart_model.predict output
+    prediction_results = {
+        'probability': prediction.probability,
+        'prediction': 1 if prediction.prediction_result else 0,
+        'risk_level': prediction.risk_level,
+        'model_name': prediction.model_name,
+        'model_predictions': prediction.model_predictions
+    }
+    
+    return render_template(
+        "results.html",
+        prediction=prediction_results,
+        input_data=input_data,
+        feature_explanations=feature_explanations,
+        feature_contributions=prediction.feature_contributions,
+        prediction_id=prediction.id,
+        from_history=True
     )
 
 if __name__ == "__main__":
