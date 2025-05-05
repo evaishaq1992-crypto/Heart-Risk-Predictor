@@ -201,14 +201,14 @@ class HeartDiseaseModel:
         input_scaled = self.scaler.transform(input_df)
         
         # Make prediction
-        prediction_proba = self.best_model.predict_proba(input_scaled)[0, 1]
+        prediction_proba = float(self.best_model.predict_proba(input_scaled)[0, 1])
         prediction_class = 1 if prediction_proba >= 0.5 else 0
         
         # Get probabilities from all models for comparison
         model_predictions = {}
         for name, model_data in self.models.items():
             model = model_data['model']
-            prob = model.predict_proba(input_scaled)[0, 1]
+            prob = float(model.predict_proba(input_scaled)[0, 1])
             model_predictions[name] = prob
         
         return {
@@ -250,11 +250,15 @@ class HeartDiseaseModel:
     
     def get_model_metrics(self):
         """Get the performance metrics for all models."""
-        return {name: {
-            'accuracy': data['accuracy'],
-            'auc': data['auc'],
-            'confusion_matrix': data['confusion_matrix'].tolist()
-        } for name, data in self.models.items()}
+        # Convert NumPy arrays and values to Python native types to ensure JSON serialization
+        metrics = {}
+        for name, data in self.models.items():
+            metrics[name] = {
+                'accuracy': float(data['accuracy']),
+                'auc': float(data['auc']),
+                'confusion_matrix': [[int(x) for x in row] for row in data['confusion_matrix']]
+            }
+        return metrics
     
     def get_feature_explanations(self, input_data):
         """Get explanations for how each feature affects the prediction."""
@@ -365,7 +369,7 @@ class HeartDiseaseModel:
         
         # Calculate feature contributions using permutation approach
         contributions = {}
-        baseline_prob = self.best_model.predict_proba(input_scaled)[0, 1]
+        baseline_prob = float(self.best_model.predict_proba(input_scaled)[0, 1])
         
         for i, feature in enumerate(self.feature_names):
             # Create a copy of the input data
@@ -375,7 +379,7 @@ class HeartDiseaseModel:
             modified_input[0, i] = 0  # Use 0 for scaled data (approximately median)
             
             # Get new prediction
-            modified_prob = self.best_model.predict_proba(modified_input)[0, 1]
+            modified_prob = float(self.best_model.predict_proba(modified_input)[0, 1])
             
             # Calculate difference in probability
             contribution = baseline_prob - modified_prob
@@ -384,9 +388,9 @@ class HeartDiseaseModel:
         # Normalize contributions
         total_abs_contribution = sum(abs(c) for c in contributions.values())
         if total_abs_contribution > 0:
-            normalized_contributions = {f: (c / total_abs_contribution) for f, c in contributions.items()}
+            normalized_contributions = {f: float(c / total_abs_contribution) for f, c in contributions.items()}
         else:
-            normalized_contributions = {f: 0 for f in contributions.keys()}
+            normalized_contributions = {f: 0.0 for f in contributions.keys()}
         
         # Sort by absolute contribution
         sorted_contributions = dict(sorted(
