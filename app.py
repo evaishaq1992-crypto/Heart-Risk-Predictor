@@ -22,8 +22,8 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "default-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+# Configure the database with a fallback to SQLite if DATABASE_URL is not set
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///database.db")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
@@ -46,13 +46,9 @@ heart_model = HeartDiseaseModel()
 @app.route("/")
 def index():
     """Render the home page with dataset information and model overview."""
-    # Get dataset summary and visualizations
     dataset_info = heart_model.get_dataset_info()
-    
-    # Get model performance metrics
     model_metrics = heart_model.get_model_metrics()
     
-    # Generate visualizations
     age_plot = heart_model.plot_age_distribution()
     gender_plot = heart_model.plot_gender_distribution()
     target_plot = heart_model.plot_target_distribution()
@@ -79,7 +75,6 @@ def predict_form():
 def predict():
     """Process the form data and make a prediction."""
     try:
-        # Extract form data
         age = int(request.form.get("age"))
         sex = int(request.form.get("sex"))
         cp = int(request.form.get("cp"))
@@ -94,7 +89,6 @@ def predict():
         ca = int(request.form.get("ca"))
         thal = int(request.form.get("thal"))
         
-        # Create input data dictionary
         input_data = {
             'age': age,
             'sex': sex,
@@ -111,25 +105,15 @@ def predict():
             'thal': thal
         }
         
-        # Make prediction
         prediction_results = heart_model.predict(input_data)
-        
-        # Get feature contributions for database storage
         feature_contributions = heart_model.get_feature_contributions(input_data)
         
-        # Store prediction in database
         try:
             new_prediction = Prediction(
-                # User info (if provided) - we'll implement user login later
-                # user_id = None currently for anonymous predictions
-                
-                # Prediction results
                 probability=prediction_results['probability'],
-                prediction_result=prediction_results['prediction'] == 1,  # Convert to boolean
+                prediction_result=prediction_results['prediction'] == 1,
                 risk_level=prediction_results['risk_level'],
                 model_name=prediction_results['model_name'],
-                
-                # Input parameters
                 age=age,
                 sex=sex,
                 cp=cp,
@@ -143,8 +127,6 @@ def predict():
                 slope=slope,
                 ca=ca,
                 thal=thal,
-                
-                # Additional data
                 model_predictions=prediction_results['model_predictions'],
                 feature_contributions=feature_contributions
             )
@@ -152,16 +134,12 @@ def predict():
             db.session.add(new_prediction)
             db.session.commit()
             logger.info(f"Prediction saved to database with ID: {new_prediction.id}")
-            
-            # Store prediction ID in session
             session['prediction_id'] = new_prediction.id
             
         except Exception as db_error:
             logger.error(f"Database error: {str(db_error)}")
-            # Continue with prediction even if DB save fails
             db.session.rollback()
         
-        # Store results in session
         session['prediction_results'] = prediction_results
         session['input_data'] = input_data
         
@@ -183,10 +161,7 @@ def results():
         flash("No prediction data available. Please submit the form first.", "warning")
         return redirect(url_for('predict_form'))
     
-    # Get feature explanations based on input data
     feature_explanations = heart_model.get_feature_explanations(input_data)
-    
-    # Get individual feature contributions (for SHAP values visualization)
     feature_contributions = heart_model.get_feature_contributions(input_data)
     
     return render_template(
@@ -201,21 +176,14 @@ def results():
 @app.route("/history")
 def prediction_history():
     """Display prediction history from the database."""
-    # Get all predictions, ordered by most recent first
     predictions = Prediction.query.order_by(Prediction.created_at.desc()).all()
-    
-    return render_template(
-        "history.html",
-        predictions=predictions
-    )
+    return render_template("history.html", predictions=predictions)
 
 @app.route("/history/<int:prediction_id>")
 def prediction_detail(prediction_id):
     """Display detailed results for a specific prediction."""
-    # Get the prediction from the database
     prediction = Prediction.query.get_or_404(prediction_id)
     
-    # Create input data dictionary
     input_data = {
         'age': prediction.age,
         'sex': prediction.sex,
@@ -232,10 +200,8 @@ def prediction_detail(prediction_id):
         'thal': prediction.thal
     }
     
-    # Get feature explanations
     feature_explanations = heart_model.get_feature_explanations(input_data)
     
-    # Create prediction results dictionary similar to the heart_model.predict output
     prediction_results = {
         'probability': prediction.probability,
         'prediction': 1 if prediction.prediction_result else 0,

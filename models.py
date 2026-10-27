@@ -62,4 +62,4 @@ class Prediction(db.Model):
     user = relationship("User", back_populates="predictions")
     
     def __repr__(self):
-        return f"<Prediction {self.id} - Result: {self.prediction_result}>"
+        return f"<Prediction {self.id} Result: {self.prediction_result}>"
